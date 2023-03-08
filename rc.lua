@@ -120,7 +120,27 @@ function get_command_output(command)
 end
 
 
--- battery
+function remove_whitespace(input_string)
+
+    -- Use string.gsub to remove leading and trailing white space
+    local output_string = string.gsub(input_string, "%s*(.-)%s*", "%1")
+
+    -- Print the result
+    return output_string
+
+end
+
+
+-- Require the Defaults class
+-- local Defaults = require("defaults")
+
+-- Create a new instance of the Defaults class
+-- local defaults = Defaults:new()
+
+-- Read data from the defaults file
+-- local data = defaults:read_data()
+
+-- battery widget
 batterywidget = wibox.widget.textbox()
 local update_battery_widget = function ()
     local command = "acpi -b"
@@ -147,12 +167,37 @@ local update_volume_widget = function ()
     end
 end
 
+
+
+-- brightness widget
+brightnesswidget = wibox.widget.textbox()
+
+local getDisplay = function()
+
+    local command = 'xrandr | grep " connected" | awk \'{ print$1 }\''
+    local display = get_command_output(command)
+    display = remove_whitespace(display)
+    return display
+
+end
+
+local update_brightness_widget = function ()
+    local command = 'xrandr --verbose | grep Brightness'
+    local command_output, command_exitcode = get_command_output(command)
+    command_output = remove_whitespace(command_output)
+    if 1==1 then
+        -- brightnesswidget:set_text(" Brightness : "..command_output)
+        brightnesswidget:set_text(" "..command_output.." ")
+    else
+        brightnesswidget:set_text(" "..command_output.." ")
+    end
+end
+
+
 update_battery_widget()
 update_volume_widget()
-
-
-
-
+update_brightness_widget()
+display = getDisplay()
 
 
 -- timer
@@ -160,13 +205,15 @@ mytimer = timer({ timeout = 5 })
 mytimer:connect_signal("timeout", function()
     update_battery_widget()
     update_volume_widget()
+    display = getDisplay()
+    update_brightness_widget()
     end)
 mytimer:start()
 
 
 
 
-
+-- Volume
 
 -- Create a slider widget
 local volumeslider = wibox.widget {
@@ -199,19 +246,7 @@ local volumeslider = wibox.widget {
 
 
 -- Create a popup widget
-local voluemesliderpopup = awful.popup {
-    -- widget = mytextbox,
-    -- widget= wibox.widget {
-    --     forced_width = 20,
-    --     forced_height = 20,
-    --     bar_border_color    = beautiful.border_color,
-    --     bar_border_width    = 1,
-    --     bar_margins         = {},
-    --     handle_color        = "#00ff00",
-    --     handle_border_color = beautiful.border_color,
-    --     handle_border_width = 1,
-    --     widget              = wibox.widget.slider,
-    -- },
+local volumesliderpopup = awful.popup {
     widget = volumeslider,
     -- placement = awful.placement.centered,
     placement = awful.placement.centered,
@@ -229,13 +264,97 @@ local voluemesliderpopup = awful.popup {
 -- Connect a click event to show the popup
 volumewidget:connect_signal("button::press", function(_, _, _, button)
     if button == 1 then -- left click
-        voluemesliderpopup.visible = not voluemesliderpopup.visible
+        volumesliderpopup.visible = not volumesliderpopup.visible
     end
 end)
 
 
 -- pop up end
 
+
+
+-- for Brightness
+-- Create a slider widget
+local brightnessslider = wibox.widget {
+
+    forced_width = 200,
+    forced_height = 20,
+    bar_border_color    = beautiful.border_color,
+    bar_border_width    = 1,
+    bar_margins         = {},
+    handle_color        = "#00ffff",
+    handle_border_color = beautiful.border_color,
+    handle_border_width = 1,
+    widget              = wibox.widget.slider,
+    maximum = 100,
+    minimum = 0,
+    value = 70,
+}
+
+-- Connect the slider widget to the progressbar widget
+ brightnessslider:connect_signal("property::value", function()
+     -- myprogressbar.value = brightnessslider.value
+
+    local display = getDisplay()
+    local value = brightnessslider.value
+
+    local minBrightness = 20
+    if value <= minBrightness then
+        value = minBrightness
+    end
+
+    value = value / 100
+
+    -- for red shift
+    local gamma = "1:0.7:0.7"
+    -- xrandr --output DISPLAY --brightness 1.0
+    local command = "xrandr --output "..display.." --brightness "..value.." --gamma "..gamma
+    -- local command = "amixer set Master "..value.."% "
+    -- amixer set Master 66%
+    local exit_status = os.execute(command .. " >/dev/null 2>&1")
+    update_brightness_widget()
+
+
+ end)
+
+
+-- Create a popup widget
+local brightnesssliderpopup = awful.popup {
+    -- widget = mytextbox,
+    -- widget= wibox.widget {
+    --     forced_width = 20,
+    --     forced_height = 20,
+    --     bar_border_color    = beautiful.border_color,
+    --     bar_border_width    = 1,
+    --     bar_margins         = {},
+    --     handle_color        = "#00ff00",
+    --     handle_border_color = beautiful.border_color,
+    --     handle_border_width = 1,
+    --     widget              = wibox.widget.slider,
+    -- },
+    widget = brightnessslider,
+    -- placement = awful.placement.centered,
+    placement = awful.placement.centered,
+    -- placement = awful.placement.next_to(brightnesswidget),
+    shape = function(cr, width, height)
+        gears.shape.rounded_rect(cr, width, height, 5)
+    end,
+    border_color = "#aaaaaa",
+    border_width = 2,
+    ontop = true,
+    visible = false,
+}
+
+
+-- Connect a click event to show the popup
+brightnesswidget:connect_signal("button::press", function(_, _, _, button)
+    if button == 1 then -- left click
+        brightnesssliderpopup.visible = not brightnesssliderpopup.visible
+    end
+end)
+
+
+-- pop up end
 
 
 
@@ -468,6 +587,7 @@ awful.screen.connect_for_each_screen(function(s)
             mytextbox,
             batterywidget,
             volumewidget,
+            brightnesswidget,
             mykeyboardlayout,
             wibox.widget.systray(),
             mytextclock,
