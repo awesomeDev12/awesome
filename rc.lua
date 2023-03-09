@@ -710,6 +710,10 @@ globalkeys = gears.table.join(
 
     -- Custom Keybindings
 
+    awful.key({ }, "Print", function ()
+        awful.util.spawn("scrot -e 'mv $f ~/screenshots/ 2>/dev/null'", false)
+    end),
+
     awful.key({ modkey,           }, "Up",
         function ()
             awful.client.focus.byidx( 1)
@@ -721,7 +725,36 @@ globalkeys = gears.table.join(
             awful.client.focus.byidx(-1)
         end,
         {description = "focus previous by index", group = "client"}
-    )
+    ),
+
+
+    -- Alacritty
+    awful.key({ modkey }, "a", function ()
+        awful.util.spawn("alacritty")
+    end,{description = "alacritty", group = "applications"}),
+
+    -- Brave
+    awful.key({ modkey }, "b", function ()
+        awful.util.spawn("brave")
+    end,{description = "brave", group = "applications"}),
+
+    -- Firefox
+    awful.key({ modkey }, "c", function ()
+        awful.util.spawn("firefox")
+    end,{description = "firefox", group = "applications"}),
+
+
+    -- Vivaldi
+    awful.key({ modkey }, "d", function ()
+        awful.util.spawn("vivaldi-stable")
+    end,{description = "vivaldi-stable", group = "applications"}),
+
+
+    -- Pcmanfm (file manager)
+    awful.key({ modkey }, "e", function ()
+        awful.util.spawn("pcmanfm")
+    end,{description = "pcmanfm", group = "applications"})
+
 
 
 )
@@ -755,7 +788,7 @@ clientkeys = gears.table.join(
             c.maximized = not c.maximized
             c:raise()
         end ,
-        {description = "(un)maximize", group = "client"}),
+        {description = "(un)maxbmize", group = "client"}),
     awful.key({ modkey, "Control" }, "m",
         function (c)
             c.maximized_vertical = not c.maximized_vertical
@@ -894,8 +927,17 @@ awful.rules.rules = {
     -- { rule = { class = "Firefox" },
     --   properties = { screen = 1, tag = "2" } },
 
-
     -- Custom rules
+
+    -- Set Firefox to always map on the tag named "2" on screen 1.
+    { rule = { class = "Brave" },
+      properties = { screen = 1, tag = "2" } },
+
+
+    -- Set Vivaldi to always map on the tag named "2" on screen 1.
+    { rule = { class = "Vivaldi" },
+      properties = { screen = 1, tag = "3" } },
+
 }
 -- }}}
 
