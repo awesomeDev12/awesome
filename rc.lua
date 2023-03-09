@@ -140,6 +140,46 @@ end
 -- Read data from the defaults file
 -- local data = defaults:read_data()
 
+
+-- Icons Start
+
+
+-- create an imagebox widget
+local batteryiconwidget = wibox.widget {
+    {
+        image = gears.filesystem.get_configuration_dir() .. "images/battery-icon.jpg",
+        resize = true,
+        widget = wibox.widget.imagebox
+    },
+    layout = wibox.container.margin(_, _, _, 4)
+}
+
+-- create an imagebox widget
+local brightnessiconwidget = wibox.widget {
+    {
+        image = gears.filesystem.get_configuration_dir() .. "images/brightness-icon.jpg",
+        resize = true,
+        widget = wibox.widget.imagebox
+    },
+    layout = wibox.container.margin(_, _, _, 4)
+}
+
+
+-- create an imagebox widget
+local volumeiconwidget = wibox.widget {
+    {
+        image = gears.filesystem.get_configuration_dir() .. "images/volume-icon.jpg",
+        resize = true,
+        widget = wibox.widget.imagebox
+    },
+    layout = wibox.container.margin(_, _, _, 4)
+}
+
+
+-- Icons End
+
+
+
 -- battery widget
 batterywidget = wibox.widget.textbox()
 local update_battery_widget = function ()
@@ -147,11 +187,13 @@ local update_battery_widget = function ()
     local command_output, command_exitcode = get_command_output(command)
     if string.match( command_output, "No support for device type: power_supply") then
         -- batterywidget:set_text(" No Battery ")
-        batterywidget:set_text(" ")
+        batterywidget:set_text("  ".."AC".."  ")
     else
         batterywidget:set_text( command_output )
     end
 end
+
+
 
 
 -- volume widget
@@ -160,8 +202,14 @@ volumewidget = wibox.widget.textbox()
 local update_volume_widget = function ()
     local command = 'amixer get Master | grep -oE "[0-9]+%"'
     local command_output, command_exitcode = get_command_output(command)
+
+    -- local str = "70%"
+    local str = command_output
+    local number = tonumber(string.match(str, "%d+"))
+
     if 1==1 then
-        volumewidget:set_text(" Volume : "..command_output)
+        -- volumewidget:set_text(" Volume : "..command_output)
+        volumewidget:set_text("  "..number.."%  ")
     else
         volumewidget:set_text( command_output )
     end
@@ -185,9 +233,19 @@ local update_brightness_widget = function ()
     local command = 'xrandr --verbose | grep Brightness'
     local command_output, command_exitcode = get_command_output(command)
     command_output = remove_whitespace(command_output)
+
+    -- local str = "Brightness:1.0"
+    local str = command_output
+    local brightness_level = tonumber(string.match(str, "%d+%.?%d*"))
+    brightness_level = brightness_level * 100
+    brightness_level = math.floor(brightness_level)
+    -- the `tonumber` function converts the string to a floating point number
+    -- the `string.match` function looks for a pattern in the string and returns the matched text
+    -- the pattern "%d+%.?%d*" matches one or more digits followed by an optional decimal point and zero or more digits
+
     if 1==1 then
         -- brightnesswidget:set_text(" Brightness : "..command_output)
-        brightnesswidget:set_text(" "..command_output.." ")
+        brightnesswidget:set_text("  "..brightness_level.."%")
     else
         brightnesswidget:set_text(" "..command_output.." ")
     end
@@ -197,7 +255,7 @@ end
 update_battery_widget()
 update_volume_widget()
 update_brightness_widget()
-display = getDisplay()
+-- display = getDisplay()
 
 
 -- timer
@@ -205,7 +263,7 @@ mytimer = timer({ timeout = 5 })
 mytimer:connect_signal("timeout", function()
     update_battery_widget()
     update_volume_widget()
-    display = getDisplay()
+    -- display = getDisplay()
     update_brightness_widget()
     end)
 mytimer:start()
@@ -262,7 +320,7 @@ local volumesliderpopup = awful.popup {
 
 
 -- Connect a click event to show the popup
-volumewidget:connect_signal("button::press", function(_, _, _, button)
+volumeiconwidget:connect_signal("button::press", function(_, _, _, button)
     if button == 1 then -- left click
         volumesliderpopup.visible = not volumesliderpopup.visible
     end
@@ -347,7 +405,7 @@ local brightnesssliderpopup = awful.popup {
 
 
 -- Connect a click event to show the popup
-brightnesswidget:connect_signal("button::press", function(_, _, _, button)
+brightnessiconwidget:connect_signal("button::press", function(_, _, _, button)
     if button == 1 then -- left click
         brightnesssliderpopup.visible = not brightnesssliderpopup.visible
     end
@@ -419,7 +477,7 @@ end)
 
 -- Create a text box widget
 local mytextbox = wibox.widget {
-    text = "Hello, world!",
+    text = "Hello, world! ",
     widget = wibox.widget.textbox,
 }
 
@@ -464,6 +522,17 @@ end)
 
 
 -- pop up end
+
+
+myseparator = wibox.widget {
+    orientation  = 'vertical',
+    thickness    = 2,
+    color        = '#888888',
+    -- forced_height = 20,
+    forced_width = 15,
+    widget       = wibox.widget.separator
+}
+
 
 -- my custom  widgets end
 
@@ -585,9 +654,14 @@ awful.screen.connect_for_each_screen(function(s)
             layout = wibox.layout.fixed.horizontal,
             myprogressbar,
             mytextbox,
+            myseparator,
+            batteryiconwidget,
             batterywidget,
+            volumeiconwidget,
             volumewidget,
+            brightnessiconwidget,
             brightnesswidget,
+            myseparator,
             mykeyboardlayout,
             wibox.widget.systray(),
             mytextclock,
@@ -652,13 +726,39 @@ globalkeys = gears.table.join(
         end,
         {description = "go back", group = "client"}),
 
+
+    -- add key bindings for Alt+Tab and Alt+Escape
+    awful.key({ "Mod1", }, "Tab",
+        function()
+            awful.client.focus.history.previous()
+            if client.focus then
+                client.focus:raise()
+            end
+        end,
+        { description = "go back", group = "client" }),
+    awful.key({ "Mod1", }, "Escape",
+        function()
+            awful.client.focus.history.previous()
+            if client.focus then
+                client.focus:raise()
+            end
+        end,
+        { description = "go back", group = "client" }),
+
     -- Standard program
     awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
               {description = "open a terminal", group = "launcher"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
-    awful.key({ modkey, "Shift"   }, "q", awesome.quit,
+
+    awful.key({ modkey, "Shift"   }, "q", function ()
+        mytimer:stop()
+        awesome.quit()
+    end,
               {description = "quit awesome", group = "awesome"}),
+
+    -- awful.key({ modkey, "Shift"   }, "q", awesome.quit,
+    --           {description = "quit awesome", group = "awesome"}),
 
     awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)          end,
               {description = "increase master width factor", group = "layout"}),
