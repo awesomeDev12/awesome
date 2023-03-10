@@ -21,7 +21,7 @@ require("awful.hotkeys_popup.keys")
 
 
 -- define brightneess object
-brightness = {}
+local brightness = {}
 
 -- for Brightness
 -- brightness widget

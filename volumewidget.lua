@@ -20,7 +20,7 @@ require("awful.hotkeys_popup.keys")
 
 
 -- define volume object
-volume = {}
+local volume = {}
 
 -- volume widget
 volume.volumewidget = wibox.widget.textbox()

@@ -21,7 +21,7 @@ require("awful.hotkeys_popup.keys")
 
 
 -- create battery object
-battery = {}
+local battery = {}
 
 -- create an imagebox widget
 battery.batteryiconwidget = wibox.widget {
