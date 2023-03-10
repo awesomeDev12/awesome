@@ -104,12 +104,6 @@ mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesom
 -- My custom widgets begin
 
 
--- My first custom widget
--- praise_widget = wibox.widget.textbox()
--- praise_widget.text = "You are great!"
-
--- My second custom widget
-
 function get_command_output(command)
     -- local command = "your_bash_command_here"
     local command_output = io.popen(command .. " 2>&1"):read("*all")
@@ -141,347 +135,18 @@ end
 -- local data = defaults:read_data()
 
 
--- Icons Start
 
 
--- create an imagebox widget
-local batteryiconwidget = wibox.widget {
-    {
-        image = gears.filesystem.get_configuration_dir() .. "images/battery-icon.jpg",
-        resize = true,
-        widget = wibox.widget.imagebox
-    },
-    layout = wibox.container.margin(_, _, _, 4)
-}
-
--- create an imagebox widget
-local brightnessiconwidget = wibox.widget {
-    {
-        image = gears.filesystem.get_configuration_dir() .. "images/brightness-icon.jpg",
-        resize = true,
-        widget = wibox.widget.imagebox
-    },
-    layout = wibox.container.margin(_, _, _, 4)
-}
-
-
--- create an imagebox widget
-local volumeiconwidget = wibox.widget {
-    {
-        image = gears.filesystem.get_configuration_dir() .. "images/volume-icon.jpg",
-        resize = true,
-        widget = wibox.widget.imagebox
-    },
-    layout = wibox.container.margin(_, _, _, 4)
-}
-
-
--- Icons End
-
-
-
--- battery widget
-batterywidget = wibox.widget.textbox()
-local update_battery_widget = function ()
-    local command = "acpi -b"
-    local command_output, command_exitcode = get_command_output(command)
-    if string.match( command_output, "No support for device type: power_supply") then
-        -- batterywidget:set_text(" No Battery ")
-        batterywidget:set_text("  ".."AC".."  ")
-    else
-        batterywidget:set_text( command_output )
-    end
-end
-
-
-
-
--- volume widget
-volumewidget = wibox.widget.textbox()
-
-local update_volume_widget = function ()
-    local command = 'amixer get Master | grep -oE "[0-9]+%"'
-    local command_output, command_exitcode = get_command_output(command)
-
-    -- local str = "70%"
-    local str = command_output
-    local number = tonumber(string.match(str, "%d+"))
-
-    if 1==1 then
-        -- volumewidget:set_text(" Volume : "..command_output)
-        volumewidget:set_text("  "..number.."%  ")
-    else
-        volumewidget:set_text( command_output )
-    end
-end
-
-
-
-
-
-
--- Volume
-
--- Create a slider widget
-local volumeslider = wibox.widget {
-
-    forced_width = 200,
-    forced_height = 20,
-    bar_border_color    = beautiful.border_color,
-    bar_border_width    = 1,
-    bar_margins         = {},
-    handle_color        = "#00ff00",
-    handle_border_color = beautiful.border_color,
-    handle_border_width = 1,
-    widget              = wibox.widget.slider,
-    maximum = 100,
-    minimum = 0,
-    value = 50,
-}
-
--- Connect the slider widget to the progressbar widget
- volumeslider:connect_signal("property::value", function()
-     -- myprogressbar.value = volumeslider.value
-    local value = volumeslider.value
-    local command = "amixer set Master "..value.."% "
-    -- amixer set Master 66%
-    local exit_status = os.execute(command .. " >/dev/null 2>&1")
-    update_volume_widget()
-
-
- end)
-
-
--- Create a popup widget
--- local volumesliderpopup = awful.popup {
---     widget = volumeslider,
---     -- placement = awful.placement.centered,
---     placement = awful.placement.centered,
---     -- placement = awful.placement.next_to(volumewidget),
---     shape = function(cr, width, height)
---         gears.shape.rounded_rect(cr, width, height, 5)
---     end,
---     border_color = "#aaaaaa",
---     border_width = 2,
---     ontop = true,
---     visible = false,
--- }
-
--- Create a popup widget
-local volumesliderpopup = awful.popup {
-    widget = {
-        {
-            volumeslider,
-            layout = wibox.layout.fixed.horizontal
-        },
-        top = 10, -- add a 10-pixel margin at the top
-        bottom = 10, -- add a 10-pixel margin at the bottom
-        -- margins = 10,
-        widget = wibox.container.margin
-    },
-    -- placement = awful.placement.top_right,
-    placement = function(c)
-        awful.placement.top_right(c, {margins = {top = 50, right = 50}})
-    end,
-    shape = function(cr, width, height)
-        gears.shape.rounded_rect(cr, width, height, 5)
-    end,
-    border_color = "#aaaaaa",
-    border_width = 2,
-    ontop = true,
-    visible = false,
-}
-
--- Add a button binding to close the popup
-volumesliderpopup:buttons(
-    gears.table.join(
-        awful.button({}, 3, function()
-            volumesliderpopup.visible = false
-        end)
-    )
-)
-
-
--- Connect a click event to show the popup
-volumeiconwidget:connect_signal("button::press", function(_, _, _, button)
-    if button == 1 then -- left click
-        volumesliderpopup.visible = not volumesliderpopup.visible
-    end
-end)
-
-
-
-
-
-
-
-
-
--- for Brightness
--- brightness widget
-brightnesswidget = wibox.widget.textbox()
-
-local getDisplay = function()
-
-    local command = 'xrandr | grep " connected" | awk \'{ print$1 }\''
-    local display = get_command_output(command)
-    display = remove_whitespace(display)
-    return display
-
-end
-
-local update_brightness_widget = function ()
-    local command = 'xrandr --verbose | grep Brightness'
-    local command_output, command_exitcode = get_command_output(command)
-    command_output = remove_whitespace(command_output)
-
-    -- local str = "Brightness:1.0"
-    local str = command_output
-    local brightness_level = tonumber(string.match(str, "%d+%.?%d*"))
-    brightness_level = brightness_level * 100
-    brightness_level = math.floor(brightness_level)
-    -- the `tonumber` function converts the string to a floating point number
-    -- the `string.match` function looks for a pattern in the string and returns the matched text
-    -- the pattern "%d+%.?%d*" matches one or more digits followed by an optional decimal point and zero or more digits
-
-    if 1==1 then
-        -- brightnesswidget:set_text(" Brightness : "..command_output)
-        brightnesswidget:set_text("  "..brightness_level.."%")
-    else
-        brightnesswidget:set_text(" "..command_output.." ")
-    end
-end
-
-
-
-
-
--- Create a slider widget
-local brightnessslider = wibox.widget {
-
-    forced_width = 200,
-    forced_height = 20,
-    bar_border_color    = beautiful.border_color,
-    bar_border_width    = 1,
-    bar_margins         = {},
-    handle_color        = "#00ffff",
-    handle_border_color = beautiful.border_color,
-    handle_border_width = 1,
-    widget              = wibox.widget.slider,
-    maximum = 100,
-    minimum = 0,
-    value = 70,
-}
-
--- Connect the slider widget to the progressbar widget
- brightnessslider:connect_signal("property::value", function()
-     -- myprogressbar.value = brightnessslider.value
-
-    local display = getDisplay()
-    local value = brightnessslider.value
-
-    local minBrightness = 20
-    if value <= minBrightness then
-        value = minBrightness
-    end
-
-    value = value / 100
-
-    -- for red shift
-    local gamma = "1:0.9:0.9"
-    -- xrandr --output DISPLAY --brightness 1.0
-    local command = "xrandr --output "..display.." --brightness "..value.." --gamma "..gamma
-    -- local command = "amixer set Master "..value.."% "
-    -- amixer set Master 66%
-    local exit_status = os.execute(command .. " >/dev/null 2>&1")
-    update_brightness_widget()
-
-
- end)
-
-
--- Create a popup widget
--- local brightnesssliderpopup = awful.popup {
---     -- widget = mytextbox,
---     -- widget= wibox.widget {
---     --     forced_width = 20,
---     --     forced_height = 20,
---     --     bar_border_color    = beautiful.border_color,
---     --     bar_border_width    = 1,
---     --     bar_margins         = {},
---     --     handle_color        = "#00ff00",
---     --     handle_border_color = beautiful.border_color,
---     --     handle_border_width = 1,
---     --     widget              = wibox.widget.slider,
---     -- },
---     widget = brightnessslider,
---     -- placement = awful.placement.centered,
---     placement = awful.placement.centered,
---     -- placement = awful.placement.next_to(brightnesswidget),
---     shape = function(cr, width, height)
---         gears.shape.rounded_rect(cr, width, height, 5)
---     end,
---     border_color = "#aaaaaa",
---     border_width = 2,
---     ontop = true,
---     visible = false,
--- }
-
-local brightnesssliderpopup  = awful.popup {
-    widget = {
-        {
-            brightnessslider,
-            layout = wibox.layout.fixed.horizontal
-        },
-        top = 10, -- add a 10-pixel margin at the top
-        bottom = 10, -- add a 10-pixel margin at the bottom
-        -- margins = 10,
-        widget = wibox.container.margin
-    },
-    -- placement = awful.placement.top_right,
-    placement = function(c)
-        awful.placement.top_right(c, {margins = {top = 50, right = 50}})
-    end,
-    shape = function(cr, width, height)
-        gears.shape.rounded_rect(cr, width, height, 5)
-    end,
-    border_color = "#aaaaaa",
-    border_width = 2,
-    ontop = true,
-    visible = false,
-}
-
-
--- Add a button binding to close the popup
-brightnesssliderpopup:buttons(
-    gears.table.join(
-        awful.button({}, 3, function()
-            brightnesssliderpopup.visible = false
-        end)
-    )
-)
-
--- Connect a click event to show the popup
-brightnessiconwidget:connect_signal("button::press", function(_, _, _, button)
-    if button == 1 then -- left click
-        brightnesssliderpopup.visible = not brightnesssliderpopup.visible
-    end
-end)
-
-
--- pop up end
+local battery = require('batterywidget')
+local volume = require('volumewidget')
+local brightness = require('brightnesswidget')
 
 
 -- Additional Widget
 -- require("mywibar")
 
-
-
 -- Progressbar and Hello World textbox widget
-
 -- local myprogressbar, mytextbox, myslider, mypopup = require("helloworldwidget")
-
-
 
 
 
@@ -499,18 +164,17 @@ local myseparator = wibox.widget {
 
 
 -- init 
-update_battery_widget()
-update_volume_widget()
-update_brightness_widget()
+battery.update_battery_widget()
+volume.update_volume_widget()
+brightness.update_brightness_widget()
 -- init end
 
 -- timer
 mytimer = timer({ timeout = 5 })
 mytimer:connect_signal("timeout", function()
-    update_battery_widget()
-    update_volume_widget()
-    -- display = getDisplay()
-    update_brightness_widget()
+    battery.update_battery_widget()
+    volume.update_volume_widget()
+    brightness.update_brightness_widget()
     end)
 mytimer:start()
 
@@ -640,12 +304,12 @@ awful.screen.connect_for_each_screen(function(s)
             -- myprogressbar,
             -- mytextbox,
             myseparator,
-            batteryiconwidget,
-            batterywidget,
-            volumeiconwidget,
-            volumewidget,
-            brightnessiconwidget,
-            brightnesswidget,
+            battery.batteryiconwidget,
+            battery.batterywidget,
+            volume.volumeiconwidget,
+            volume.volumewidget,
+            brightness.brightnessiconwidget,
+            brightness.brightnesswidget,
             myseparator,
             mykeyboardlayout,
             wibox.widget.systray(),
