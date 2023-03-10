@@ -258,16 +258,6 @@ update_brightness_widget()
 -- display = getDisplay()
 
 
--- timer
-mytimer = timer({ timeout = 5 })
-mytimer:connect_signal("timeout", function()
-    update_battery_widget()
-    update_volume_widget()
-    -- display = getDisplay()
-    update_brightness_widget()
-    end)
-mytimer:start()
-
 
 
 
@@ -487,163 +477,20 @@ end)
 -- pop up end
 
 
--- Create a wibox widget
-mywibox = awful.wibar({
-    position = "top",
-    height = 20,
-    screen = screen.primary
-})
--- Create a popup widget
-mypopup = awful.popup({
-    widget = {
-        {
-            {
-                widget = wibox.widget.slider,
-                forced_width = 200,
-                forced_height = 20,
-                bar_shape = gears.shape.rounded_rect,
-                bar_height = 10,
-                handle_shape = gears.shape.circle,
-                handle_width = 20,
-                handle_color = "#FFFFFF",
-                bar_color = "#FFFFFF22",
-                value = 50
-            },
-            layout = wibox.layout.fixed.horizontal
-        },
-        -- margins = 10,
-        widget = wibox.container.margin
-    },
-    placement = awful.placement.top_right,
-    screen = screen.primary,
-    shape = function(cr, w, h)
-        gears.shape.rounded_rect(cr, w, h, 5)
-    end
-})
-
--- Add a mouse hover event to show the popup
-mywibox:connect_signal("mouse::enter", function()
-    mypopup.visible = true
-end)
-
--- Add a mouse leave event to hide the popup
-mywibox:connect_signal("mouse::leave", function()
-    mypopup.visible = false
-end)
+-- Additional Widget
+-- require("mywibar")
 
 
 
--- pop up end
+-- Progressbar and Hello World textbox widget
+
+-- local myprogressbar, mytextbox, myslider, mypopup = require("helloworldwidget")
 
 
 
 
--- progress
 
--- Create a progressbar widget
-local myprogressbar = wibox.widget {
-    max_value = 100,
-    value = 50,
-    forced_width = 100,
-    forced_height = 20,
-    widget = wibox.widget.progressbar,
-}
-
--- Create a slider widget
-local myslider = wibox.widget {
-
-    forced_width = 50,
-    forced_height = 20,
-    bar_border_color    = beautiful.border_color,
-    bar_border_width    = 1,
-    bar_margins         = {},
-    handle_color        = "#00ff00",
-    handle_border_color = beautiful.border_color,
-    handle_border_width = 1,
-    widget              = wibox.widget.slider,
-    maximum = 100,
-    minimum = 0,
-    value = 50,
-}
-
--- Connect the slider widget to the progressbar widget
-myslider:connect_signal("property::value", function()
-    myprogressbar.value = myslider.value
-end)
-
--- Connect a click event to show the slider
-myprogressbar:connect_signal("button::press", function(_, _, _, button)
-    if button == 1 then -- left click
-        -- mypopup.visible = not mypopup.visible
-
-        -- awful.prompt.run {
-        --     prompt = "Set value: ",
-        --     textbox = myslider,
-        --     exe_callback = function(value)
-        --         myslider.value = tonumber(value) or myslider.value
-        --         myprogressbar.value = myslider.value
-        --     end,
-        -- }
-    end
-end)
-
--- Add the progressbar widget to your wibox or layout
-
-
-
--- pop up
-
-
--- Create a text box widget
-local mytextbox = wibox.widget {
-    text = "Hello, world! ",
-    widget = wibox.widget.textbox,
-}
-
-
--- Create a popup widget
-local mypopup = awful.popup {
-    -- widget = mytextbox,
-    -- widget= wibox.widget {
-    --     forced_width = 20,
-    --     forced_height = 20,
-    --     bar_border_color    = beautiful.border_color,
-    --     bar_border_width    = 1,
-    --     bar_margins         = {},
-    --     handle_color        = "#00ff00",
-    --     handle_border_color = beautiful.border_color,
-    --     handle_border_width = 1,
-    --     widget              = wibox.widget.slider,
-    -- },
-    widget = myslider,
-    placement = awful.placement.centered,
-    shape = function(cr, width, height)
-        gears.shape.rounded_rect(cr, width, height, 5)
-    end,
-    border_color = "#aaaaaa",
-    border_width = 2,
-    ontop = true,
-    visible = false,
-}
-
--- Connect a click event to show the popup
-mytextbox:connect_signal("button::press", function(_, _, _, button)
-    if button == 1 then -- left click
-        mypopup.visible = not mypopup.visible
-        local area = awful.screen.focused().workarea
-        local text = mytextbox.text
-        text = text .. table.concat(area,",")
-        mytextbox:set_text(text)
-
-
-    end
-end)
-
-
--- pop up end
-
-
-myseparator = wibox.widget {
+local myseparator = wibox.widget {
     orientation  = 'vertical',
     thickness    = 2,
     color        = '#888888',
@@ -654,6 +501,24 @@ myseparator = wibox.widget {
 
 
 -- my custom  widgets end
+
+
+-- timer
+mytimer = timer({ timeout = 5 })
+mytimer:connect_signal("timeout", function()
+    update_battery_widget()
+    update_volume_widget()
+    -- display = getDisplay()
+    update_brightness_widget()
+    end)
+mytimer:start()
+
+-- timer end
+
+
+
+
+
 
 mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
@@ -771,8 +636,8 @@ awful.screen.connect_for_each_screen(function(s)
 
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            myprogressbar,
-            mytextbox,
+            -- myprogressbar,
+            -- mytextbox,
             myseparator,
             batteryiconwidget,
             batterywidget,
