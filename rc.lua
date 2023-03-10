@@ -217,47 +217,6 @@ end
 
 
 
--- brightness widget
-brightnesswidget = wibox.widget.textbox()
-
-local getDisplay = function()
-
-    local command = 'xrandr | grep " connected" | awk \'{ print$1 }\''
-    local display = get_command_output(command)
-    display = remove_whitespace(display)
-    return display
-
-end
-
-local update_brightness_widget = function ()
-    local command = 'xrandr --verbose | grep Brightness'
-    local command_output, command_exitcode = get_command_output(command)
-    command_output = remove_whitespace(command_output)
-
-    -- local str = "Brightness:1.0"
-    local str = command_output
-    local brightness_level = tonumber(string.match(str, "%d+%.?%d*"))
-    brightness_level = brightness_level * 100
-    brightness_level = math.floor(brightness_level)
-    -- the `tonumber` function converts the string to a floating point number
-    -- the `string.match` function looks for a pattern in the string and returns the matched text
-    -- the pattern "%d+%.?%d*" matches one or more digits followed by an optional decimal point and zero or more digits
-
-    if 1==1 then
-        -- brightnesswidget:set_text(" Brightness : "..command_output)
-        brightnesswidget:set_text("  "..brightness_level.."%")
-    else
-        brightnesswidget:set_text(" "..command_output.." ")
-    end
-end
-
-
-update_battery_widget()
-update_volume_widget()
-update_brightness_widget()
--- display = getDisplay()
-
-
 
 
 
@@ -358,9 +317,45 @@ end)
 
 
 
-
-
 -- for Brightness
+-- brightness widget
+brightnesswidget = wibox.widget.textbox()
+
+local getDisplay = function()
+
+    local command = 'xrandr | grep " connected" | awk \'{ print$1 }\''
+    local display = get_command_output(command)
+    display = remove_whitespace(display)
+    return display
+
+end
+
+local update_brightness_widget = function ()
+    local command = 'xrandr --verbose | grep Brightness'
+    local command_output, command_exitcode = get_command_output(command)
+    command_output = remove_whitespace(command_output)
+
+    -- local str = "Brightness:1.0"
+    local str = command_output
+    local brightness_level = tonumber(string.match(str, "%d+%.?%d*"))
+    brightness_level = brightness_level * 100
+    brightness_level = math.floor(brightness_level)
+    -- the `tonumber` function converts the string to a floating point number
+    -- the `string.match` function looks for a pattern in the string and returns the matched text
+    -- the pattern "%d+%.?%d*" matches one or more digits followed by an optional decimal point and zero or more digits
+
+    if 1==1 then
+        -- brightnesswidget:set_text(" Brightness : "..command_output)
+        brightnesswidget:set_text("  "..brightness_level.."%")
+    else
+        brightnesswidget:set_text(" "..command_output.." ")
+    end
+end
+
+
+
+
+
 -- Create a slider widget
 local brightnessslider = wibox.widget {
 
@@ -502,6 +497,12 @@ local myseparator = wibox.widget {
 
 -- my custom  widgets end
 
+
+-- init 
+update_battery_widget()
+update_volume_widget()
+update_brightness_widget()
+-- init end
 
 -- timer
 mytimer = timer({ timeout = 5 })
