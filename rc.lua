@@ -304,11 +304,36 @@ local volumeslider = wibox.widget {
 
 
 -- Create a popup widget
+-- local volumesliderpopup = awful.popup {
+--     widget = volumeslider,
+--     -- placement = awful.placement.centered,
+--     placement = awful.placement.centered,
+--     -- placement = awful.placement.next_to(volumewidget),
+--     shape = function(cr, width, height)
+--         gears.shape.rounded_rect(cr, width, height, 5)
+--     end,
+--     border_color = "#aaaaaa",
+--     border_width = 2,
+--     ontop = true,
+--     visible = false,
+-- }
+
+-- Create a popup widget
 local volumesliderpopup = awful.popup {
-    widget = volumeslider,
-    -- placement = awful.placement.centered,
-    placement = awful.placement.centered,
-    -- placement = awful.placement.next_to(volumewidget),
+    widget = {
+        {
+            volumeslider,
+            layout = wibox.layout.fixed.horizontal
+        },
+        top = 10, -- add a 10-pixel margin at the top
+        bottom = 10, -- add a 10-pixel margin at the bottom
+        -- margins = 10,
+        widget = wibox.container.margin
+    },
+    -- placement = awful.placement.top_right,
+    placement = function(c)
+        awful.placement.top_right(c, {margins = {top = 50, right = 50}})
+    end,
     shape = function(cr, width, height)
         gears.shape.rounded_rect(cr, width, height, 5)
     end,
@@ -317,6 +342,15 @@ local volumesliderpopup = awful.popup {
     ontop = true,
     visible = false,
 }
+
+-- Add a button binding to close the popup
+volumesliderpopup:buttons(
+    gears.table.join(
+        awful.button({}, 3, function()
+            volumesliderpopup.visible = false
+        end)
+    )
+)
 
 
 -- Connect a click event to show the popup
@@ -327,7 +361,12 @@ volumeiconwidget:connect_signal("button::press", function(_, _, _, button)
 end)
 
 
--- pop up end
+
+
+
+
+
+
 
 
 
@@ -377,23 +416,47 @@ local brightnessslider = wibox.widget {
 
 
 -- Create a popup widget
-local brightnesssliderpopup = awful.popup {
-    -- widget = mytextbox,
-    -- widget= wibox.widget {
-    --     forced_width = 20,
-    --     forced_height = 20,
-    --     bar_border_color    = beautiful.border_color,
-    --     bar_border_width    = 1,
-    --     bar_margins         = {},
-    --     handle_color        = "#00ff00",
-    --     handle_border_color = beautiful.border_color,
-    --     handle_border_width = 1,
-    --     widget              = wibox.widget.slider,
-    -- },
-    widget = brightnessslider,
-    -- placement = awful.placement.centered,
-    placement = awful.placement.centered,
-    -- placement = awful.placement.next_to(brightnesswidget),
+-- local brightnesssliderpopup = awful.popup {
+--     -- widget = mytextbox,
+--     -- widget= wibox.widget {
+--     --     forced_width = 20,
+--     --     forced_height = 20,
+--     --     bar_border_color    = beautiful.border_color,
+--     --     bar_border_width    = 1,
+--     --     bar_margins         = {},
+--     --     handle_color        = "#00ff00",
+--     --     handle_border_color = beautiful.border_color,
+--     --     handle_border_width = 1,
+--     --     widget              = wibox.widget.slider,
+--     -- },
+--     widget = brightnessslider,
+--     -- placement = awful.placement.centered,
+--     placement = awful.placement.centered,
+--     -- placement = awful.placement.next_to(brightnesswidget),
+--     shape = function(cr, width, height)
+--         gears.shape.rounded_rect(cr, width, height, 5)
+--     end,
+--     border_color = "#aaaaaa",
+--     border_width = 2,
+--     ontop = true,
+--     visible = false,
+-- }
+
+local brightnesssliderpopup  = awful.popup {
+    widget = {
+        {
+            brightnessslider,
+            layout = wibox.layout.fixed.horizontal
+        },
+        top = 10, -- add a 10-pixel margin at the top
+        bottom = 10, -- add a 10-pixel margin at the bottom
+        -- margins = 10,
+        widget = wibox.container.margin
+    },
+    -- placement = awful.placement.top_right,
+    placement = function(c)
+        awful.placement.top_right(c, {margins = {top = 50, right = 50}})
+    end,
     shape = function(cr, width, height)
         gears.shape.rounded_rect(cr, width, height, 5)
     end,
@@ -403,6 +466,15 @@ local brightnesssliderpopup = awful.popup {
     visible = false,
 }
 
+
+-- Add a button binding to close the popup
+brightnesssliderpopup:buttons(
+    gears.table.join(
+        awful.button({}, 3, function()
+            brightnesssliderpopup.visible = false
+        end)
+    )
+)
 
 -- Connect a click event to show the popup
 brightnessiconwidget:connect_signal("button::press", function(_, _, _, button)
@@ -415,6 +487,53 @@ end)
 -- pop up end
 
 
+-- Create a wibox widget
+mywibox = awful.wibar({
+    position = "top",
+    height = 20,
+    screen = screen.primary
+})
+-- Create a popup widget
+mypopup = awful.popup({
+    widget = {
+        {
+            {
+                widget = wibox.widget.slider,
+                forced_width = 200,
+                forced_height = 20,
+                bar_shape = gears.shape.rounded_rect,
+                bar_height = 10,
+                handle_shape = gears.shape.circle,
+                handle_width = 20,
+                handle_color = "#FFFFFF",
+                bar_color = "#FFFFFF22",
+                value = 50
+            },
+            layout = wibox.layout.fixed.horizontal
+        },
+        -- margins = 10,
+        widget = wibox.container.margin
+    },
+    placement = awful.placement.top_right,
+    screen = screen.primary,
+    shape = function(cr, w, h)
+        gears.shape.rounded_rect(cr, w, h, 5)
+    end
+})
+
+-- Add a mouse hover event to show the popup
+mywibox:connect_signal("mouse::enter", function()
+    mypopup.visible = true
+end)
+
+-- Add a mouse leave event to hide the popup
+mywibox:connect_signal("mouse::leave", function()
+    mypopup.visible = false
+end)
+
+
+
+-- pop up end
 
 
 
