@@ -481,6 +481,44 @@ globalkeys = gears.table.join(
     ),
 
 
+
+    -- Volume
+    awful.key({}, "XF86AudioRaiseVolume",
+        function()
+            awful.spawn("amixer set Master 5%+")
+        end,
+        { description = "increase volume", group = "audio" }),
+
+    awful.key({}, "XF86AudioMute",
+        function()
+            awful.spawn("amixer set Master toggle")
+        end,
+        { description = "mute volume", group = "audio" }),
+
+    awful.key({}, "XF86AudioLowerVolume",
+        function()
+            awful.spawn("amixer set Master 5%-")
+        end,
+        { description = "decrease volume", group = "audio" }),
+
+    -- Brightess
+    awful.key({}, "XF86MonBrightnessUp",
+        function()
+            awful.spawn("xbacklight -inc 10")
+        end,
+        { description = "increase brightness", group = "hotkeys" }),
+
+    awful.key({}, "XF86MonBrightnessDown",
+        function()
+            awful.spawn("xbacklight -dec 10")
+        end,
+        { description = "decrease brightness", group = "hotkeys" }),
+
+
+
+
+    -- Applications
+
     -- Alacritty
     awful.key({ modkey }, "a", function ()
         awful.util.spawn("alacritty")
