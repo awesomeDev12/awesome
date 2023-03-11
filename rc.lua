@@ -506,8 +506,12 @@ globalkeys = gears.table.join(
     -- Pcmanfm (file manager)
     awful.key({ modkey }, "e", function ()
         awful.util.spawn("pcmanfm")
-    end,{description = "pcmanfm", group = "applications"})
+    end,{description = "pcmanfm", group = "applications"}),
 
+    -- Ranger (file manager)
+    awful.key({ modkey }, "g", function ()
+        awful.util.spawn("kitty --name ranger ranger")
+    end,{description = "ranger", group = "applications"})
 
 
 )
