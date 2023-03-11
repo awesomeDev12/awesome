@@ -464,7 +464,7 @@ globalkeys = gears.table.join(
     -- Custom Keybindings
 
     awful.key({ }, "Print", function ()
-        awful.util.spawn("scrot -e 'mv $f ~/screenshots/ 2>/dev/null'", false)
+        awful.util.spawn("scrot -e 'mv $f ~/Pictures/Screenshots 2>/dev/null'", false)
     end),
 
     awful.key({ modkey,           }, "Up",
