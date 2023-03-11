@@ -389,14 +389,32 @@ globalkeys = gears.table.join(
             end
         end,
         { description = "go back", group = "client" }),
+
+    -- awful.key({ "Mod1", }, "Escape",
+    --     function()
+    --         awful.client.focus.history.previous()
+    --         if client.focus then
+    --             client.focus:raise()
+    --         end
+    --     end,
+    --     { description = "go back", group = "client" }),
+
+
+    -- Standard Alt+Tab and Alt+Shift+Tab action
     awful.key({ "Mod1", }, "Escape",
         function()
-            awful.client.focus.history.previous()
-            if client.focus then
-                client.focus:raise()
-            end
+            awful.client.focus.byidx(1)
         end,
-        { description = "go back", group = "client" }),
+        { description = "focus next by index", group = "client" }
+    ),
+
+    awful.key({ "Mod1", "Shift" }, "Escape",
+        function()
+            awful.client.focus.byidx(-1)
+        end,
+        { description = "focus previous by index", group = "client" }
+    ),
+
 
     -- Standard program
     awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
