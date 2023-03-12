@@ -47,6 +47,12 @@ end
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
+
+
+-- My customization
+require("my_customization")
+
+
 -- This is used later as the default terminal and editor to run.
 -- terminal = "xterm"
 terminal = "kitty"
@@ -825,5 +831,3 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 
 
--- My customization
-require("my_customization")
